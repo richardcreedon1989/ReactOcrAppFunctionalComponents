@@ -33,7 +33,7 @@ function Upload(props) {
   const [originalPpsn, setOriginalPpsn] = useState("");
   const [originalLastName, setOriginalLastName] = useState("");
   const [originalFirstName, setOriginalFirstName] = useState("");
-  const [isPpsnInvalid, setIsPpsnInvalid] = useState(false);
+  const [ppsnInvalidMessage, setPpsnInvalidMessage] = useState(false);
   const [formValues, setFormValues] = useState({
     ppsn: "",
     firstName: "",
@@ -50,7 +50,7 @@ function Upload(props) {
 
   // PPSN VALIDATION
   const _onKeyUp = () => {
-    let ppsnRegex = /[0-9]{7}[A-Za-z]{1}$/g;
+    // let ppsnRegex = /[0-9]{7}[A-Za-z]{1,2}$/g;
 
     function isPPSNValid(ppsn) {
       if (ppsn.length < 8 || ppsn.length > 9) {
@@ -65,11 +65,28 @@ function Upload(props) {
       return sum % 23 === checkNum;
     }
 
-    (!isPPSNValid(ppsn) || !ppsn.match(ppsnRegex)) && ppsn.length >= 8
-      ? setIsPpsnInvalid(true)
-      : setIsPpsnInvalid(false);
+    function isPPSNValidNew(ppsn) {
+      if (ppsn.length < 8 || ppsn.length > 9) {
+        return false;
+      }
+      const checkChar = ppsn.charAt(7).toUpperCase();
+      const checkNum = checkChar.charCodeAt(0) - 64;
+      let sum = 0;
+      for (let i = 2; i < 9; i++) {
+        sum += parseInt(ppsn.charAt(8 - i)) * i;
+      }
+      const newCheckChar = ppsn.charAt(8).toUpperCase();
+      const newCheckNum = newCheckChar.charCodeAt(0) - 64;
+      sum += newCheckNum * 9;
 
-    ppsn.match(ppsnRegex) && isPPSNValid(ppsn)
+      return sum % 23 === checkNum;
+    }
+
+    !isPPSNValidNew(ppsn) && !isPPSNValid(ppsn) && ppsn.length >= 8
+      ? setPpsnInvalidMessage(true)
+      : setPpsnInvalidMessage(false);
+
+    isPPSNValidNew(ppsn) || isPPSNValid(ppsn) /* && ppsn.match(ppsnRegex */
       ? setDisabled(false)
       : setDisabled(true);
   };
@@ -102,7 +119,7 @@ function Upload(props) {
       lastName,
       img: files.base64,
     };
-    console.log("data init", data);
+
     await axios(
       "https://6velcmlhx7.execute-api.us-east-1.amazonaws.com/Production",
       {
@@ -155,13 +172,13 @@ function Upload(props) {
           fileExt: "png",
           imageID: UID,
           folder: UID,
-          ppsn,
-          firstName,
-          lastName,
-          img: files.base64,
+          ppsn: "",
+          firstName: "",
+          lastName: "",
+          img: "".base64,
         };
+
         setFiles("");
-        console.log("data", data);
       })
 
       .catch((error) => {
@@ -224,8 +241,6 @@ function Upload(props) {
   useEffect(() => {
     if (ocrSuccess) {
       setFormValues({ ppsn: "", firstName: "", lastNamePresent: "" });
-
-      console.log("files", files);
     }
   }, [ocrSuccess, files]);
 
@@ -252,7 +267,7 @@ function Upload(props) {
                   value={ppsn || ""}
                 />
 
-                {isPpsnInvalid ? (
+                {ppsnInvalidMessage ? (
                   <FormFeedback className="text-danger">
                     Invalid PPSN
                   </FormFeedback>

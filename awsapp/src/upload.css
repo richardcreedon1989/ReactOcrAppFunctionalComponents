@@ -21,14 +21,13 @@
 .widthThree {
   width: 300px;
 }
-html h5 * {
+/* html h5 * {
   font-family: Open Sans;
   color: #444444;
-}
+} */
 
-html h5 * {
-  font-family: "Times New Roman", Times, serif;
-  color: red;
+body * {
+  font-family: open sans;
 }
 
 .upload-btn-wrapper input[type="file"] {
