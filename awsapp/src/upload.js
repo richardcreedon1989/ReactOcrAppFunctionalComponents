@@ -4,13 +4,9 @@ import {
   Form,
   FormGroup,
   Label,
-  FormText,
   Input,
-  Dropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
   FormFeedback,
+  CustomInput,
 } from "reactstrap";
 import axios from "axios";
 import "./upload.css";
@@ -26,14 +22,15 @@ function Upload(props) {
   const [lastNamePresent, setLastNamePresent] = useState(false);
   const [firstNamePresent, setFirstNamePresent] = useState(false);
   const [disabled, setDisabled] = useState(true);
-  const [dropDownOpen, setDropDownOpen] = useState(false);
-  const [dropDownValue, setDropDownValue] = useState("");
-  const [invoiceUploaded, setInvoiceUploaded] = useState("Upload Document");
+
+  const [checkBox, setCheckBox] = useState("");
+  // const [invoiceUploaded, setInvoiceUploaded] = useState("Upload Document");
   const [ocrSuccess, setOcrSuccess] = useState(false);
   const [originalPpsn, setOriginalPpsn] = useState("");
   const [originalLastName, setOriginalLastName] = useState("");
   const [originalFirstName, setOriginalFirstName] = useState("");
   const [ppsnInvalidMessage, setPpsnInvalidMessage] = useState(false);
+  const [completeMatch, setCompleteMatch] = useState(false);
   const [formValues, setFormValues] = useState({
     ppsn: "",
     firstName: "",
@@ -48,8 +45,13 @@ function Upload(props) {
     setFormValues({ ...formValues, [name]: value });
   };
 
+  const checkBoxHandler = (e) => {
+    e.preventDefault();
+    setCheckBox(e.target.value);
+  };
+
   // PPSN VALIDATION
-  const _onKeyUp = () => {
+  const _onBlur = () => {
     // let ppsnRegex = /[0-9]{7}[A-Za-z]{1,2}$/g;
 
     function isPPSNValid(ppsn) {
@@ -91,25 +93,13 @@ function Upload(props) {
       : setDisabled(true);
   };
 
-  // DROPDOWN SELECTION
-  const toggle = () => {
-    dropDownOpen === false ? setDropDownOpen(true) : setDropDownOpen(false);
-  };
-
-  const selectDD = (e) => {
-    setDropDownValue(e.currentTarget.textContent);
-  };
-
-  const dropDownMessage =
-    dropDownValue !== "" ? dropDownValue : "Select Document Type";
-
   // API CALL TO AWS S3 & TEXTRACT
 
   const getFiles = async (files) => {
     setFiles(files);
-
-    const UID = Math.round(1 + Math.random() * (1000000 - 1));
     const { ppsn, firstName, lastName } = formValues;
+    const UID = Math.round(1 + Math.random() * (1000000 - 1));
+
     let data = {
       fileExt: "png",
       imageID: UID,
@@ -129,9 +119,9 @@ function Upload(props) {
     )
       .then((res) => {
         console.log("s3", res);
-        setInvoiceUploaded(
-          `${dropDownValue !== "N/A" ? dropDownValue : "Document"} Uploaded`
-        );
+        // setInvoiceUploaded(
+        //   `${checkBox !== "Other" || "" ? checkBox : "Document"} Uploaded`
+        // );
       })
       .catch((error) => {
         console.log(error);
@@ -155,7 +145,11 @@ function Upload(props) {
         const returndedData = JSON.parse(res.config.data);
 
         setOriginalPpsn(returndedData.ppsn);
-        setOriginalLastName(returndedData.lastName);
+
+        returndedData.lastName === undefined
+          ? setOriginalLastName("")
+          : setOriginalLastName(returndedData.lastName);
+
         setOriginalFirstName(returndedData.firstName);
 
         setLambdaReturn(response[0]);
@@ -168,15 +162,6 @@ function Upload(props) {
         ppsn !== "" && setPpsnPresent(response[1]);
         firstName !== "" && setFirstNamePresent(response[2]);
         lastName !== "" && setLastNamePresent(response[3]);
-        data = {
-          fileExt: "png",
-          imageID: UID,
-          folder: UID,
-          ppsn: "",
-          firstName: "",
-          lastName: "",
-          img: "".base64,
-        };
 
         setFiles("");
       })
@@ -229,59 +214,78 @@ function Upload(props) {
   const firstNameMatchDisplayEmpty =
     ocrSuccess && originalFirstName === "" && "First Name Not Provided";
 
-  //LOADING MESSAGES
-  const searchingDocumentMessage =
-    invoiceUploaded === `${dropDownValue} Uploaded` &&
-    ocrSuccess === false &&
-    "Searching Document";
-
-  const uploadDocumentMessage =
-    dropDownValue !== "N/A" || "" ? dropDownValue : "file";
-
   useEffect(() => {
     if (ocrSuccess) {
       setFormValues({ ppsn: "", firstName: "", lastNamePresent: "" });
     }
-  }, [ocrSuccess, files]);
+    ppsnMatchDisplayTrue &&
+    lastNameMatchDisplayTrue &&
+    firstNameMatchDisplayTrue
+      ? setCompleteMatch(true)
+      : setCompleteMatch(false);
+  }, [
+    ocrSuccess,
+    firstNameMatchDisplayTrue,
+    lastNameMatchDisplayTrue,
+    ppsnMatchDisplayTrue,
+  ]);
 
   return (
-    <div className="container" style={styles.marginTop10}>
+    <div className="container">
       <div className="mt-3">
         <div>
+          <img
+            style={{
+              padding: "10px 0 0px 0",
+
+              width: "100%",
+            }}
+            src={require("./loading.png")}
+            alt="boi"
+          />
           <Form>
             <FormGroup>
-              <Label for="ppsn" style={styles.marginTop10}>
-                <h5 style={styles.boiText}>
+              <Label
+                style={{ marginTop: "2px", marginBottom: "2px" }}
+                for="ppsn"
+                className="marginTop10"
+              >
+                <h5 className="boiText">
                   {" "}
-                  PPSN <span style={{ color: "red" }}> * </span>
+                  Personal Public Service Number{" "}
+                  <span style={{ color: "red" }}> * </span>
                 </h5>
+
                 <Input
-                  valid
-                  style={styles.width300}
+                  style={{ marginTop: "2px", marginBottom: "2px" }}
+                  className="width300"
                   type="text"
                   name="ppsn"
                   id="ppsn"
                   placeholder="(e.g. 1234567P)"
                   onChange={handleChange}
-                  onKeyUp={_onKeyUp}
+                  onBlur={_onBlur}
                   value={ppsn || ""}
                 />
 
                 {ppsnInvalidMessage ? (
                   <FormFeedback className="text-danger">
-                    Invalid PPSN
+                    Please enter valid PPSN
                   </FormFeedback>
                 ) : (
                   <FormFeedback></FormFeedback>
                 )}
               </Label>
             </FormGroup>
-
             <FormGroup>
-              <Label for="lastName">
-                <h5 style={styles.boiText}> LAST NAME</h5>
+              <Label
+                style={{ marginTop: "-18px", marginBottom: "2px" }}
+                for="lastName"
+              >
+                <h5 className="boiText"> Last Name</h5>
                 <Input
-                  style={styles.width300}
+                  style={{ marginTop: "2px", marginBottom: "2px" }}
+                  className="width300"
                   type="text"
                   name="lastName"
                   id="lastName"
@@ -293,10 +297,14 @@ function Upload(props) {
               </Label>
             </FormGroup>
             <FormGroup>
-              <Label for="firstName">
-                <h5 style={styles.boiText}> FIRST NAME </h5>
+              <Label
+                style={{ marginTop: "-18px", marginBottom: "2px" }}
+                for="firstName"
+              >
+                <h5 className="boiText"> First Name </h5>
                 <Input
-                  style={styles.width300}
+                  style={{ marginTop: "2px", marginBottom: "0px" }}
+                  className="width300"
                   type="text"
                   name="firstName"
                   id="firstName"
@@ -308,83 +316,152 @@ function Upload(props) {
               </Label>
             </FormGroup>
 
-            <Dropdown isOpen={dropDownOpen} toggle={toggle}>
-              <DropdownToggle style={styles.boiButton} caret>
-                {dropDownMessage}
-              </DropdownToggle>
-              <DropdownMenu>
-                <DropdownItem header>
-                  P60/Payslip/Revenue Letter/Social Welfare
-                </DropdownItem>
-                <DropdownItem onClick={selectDD} style={styles.boiButton}>
-                  P60
-                </DropdownItem>
-                <DropdownItem onClick={selectDD} style={styles.boiButton}>
-                  Payslip
-                </DropdownItem>
+            <h4
+              className="boiText"
+              style={{ marginBottom: "5px", marginTop: "20px" }}
+            >
+              {" "}
+              Document Type{" "}
+            </h4>
+            <FormGroup
+              style={{
+                marginRight: "5px",
+                marginTop: "0px",
+                marginBottom: "0px",
+              }}
+            >
+              <CustomInput
+                style={{
+                  marginRight: "5px",
+                  marginTop: "0px",
+                  marginBottom: "0px",
+                }}
+                className="boiText"
+                type="radio"
+                value="P60"
+                id="p60"
+                name="P60"
+                onChange={checkBoxHandler}
+                checked={checkBox === "P60"}
+                label={<span className="boiTextInput"> P60 </span>}
+              />
+              <CustomInput
+                className="boiText"
+                style={{
+                  marginRight: "5px",
+                  marginTop: "0px",
+                  marginBottom: "0px",
+                }}
+                type="radio"
+                id="payslip"
+                value="Payslip"
+                name="Payslip"
+                onChange={checkBoxHandler}
+                checked={checkBox === "Payslip"}
+                label={<span className="boiTextInput"> Payslip </span>}
+              />
 
-                <DropdownItem onClick={selectDD} style={styles.boiButton}>
-                  Revenue Document
-                </DropdownItem>
-                <DropdownItem onClick={selectDD} style={styles.boiButton}>
-                  Social Welfare Letter
-                </DropdownItem>
-                <DropdownItem onClick={selectDD} style={styles.boiButton}>
-                  N/A
-                </DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
-
+              <CustomInput
+                type="radio"
+                className="boiText"
+                style={{
+                  marginRight: "5px",
+                  marginTop: "0px",
+                  marginBottom: "0px",
+                }}
+                id="socialWelfareDocument"
+                name="Social Welfare Document"
+                value="Social Welfare Document"
+                label={
+                  <span className="boiTextInput">
+                    {" "}
+                    Social Welfare Document{" "}
+                  </span>
+                }
+                onChange={checkBoxHandler}
+                checked={checkBox === "Social Welfare Document"}
+              />
+              <CustomInput
+                type="radio"
+                className="boiText"
+                style={{
+                  marginRight: "5px",
+                  marginTop: "0px",
+                  marginBottom: "0px",
+                }}
+                id="other"
+                name="other"
+                value="Other"
+                label={<span className="boiTextInput"> Other </span>}
+                onChange={checkBoxHandler}
+                checked={checkBox === "Other"}
+              />
+            </FormGroup>
             <FormGroup>
-              <h4 style={styles.boiText}> {invoiceUploaded}</h4>
-              <h4 className="text-danger">{searchingDocumentMessage}</h4>
-              <FormText color="muted"> PNG, JPG </FormText> <br />
+              {/* <h4 className="boiText"> {invoiceUploaded}</h4>
+              <h4 className="text-danger">{searchingDocumentMessage}</h4> */}
               <br />
               <div className="width upload-btn-wrapper ">
-                <button className="btn width">
-                  Upload {uploadDocumentMessage}
-                </button>
+                <button className="btn width">Upload</button>
                 <FileBase64 className="width" mulitple={true} onDone={getFiles}>
                   {" "}
                 </FileBase64>
               </div>
             </FormGroup>
-
-            <div style={styles.boiText}>
-              {ppsnMatchDisplayTrue}
-              {ppsnMatchDisplayFalse}
-              {ppsnMatchDisplayEmpty} <br />
-              {lastNameMatchDisplayTrue}
-              {lastNameMatchDisplayFalse}
-              {lastNameMatchDisplayEmpty} <br />
-              {firstNameMatchDisplayEmpty}
-              {firstNameMatchDisplayFalse}
-              {firstNameMatchDisplayTrue}
-              <br />
+            <div style={{ textAlign: "center" }}>
+              <div className="matchDisplayResultsPositive ">
+                {" "}
+                {ppsnMatchDisplayTrue}{" "}
+              </div>
+              <div className="matchDisplayResultsNegative">
+                {" "}
+                {ppsnMatchDisplayFalse}
+              </div>
+              <div className="matchDisplayResultsNegative">
+                {ppsnMatchDisplayEmpty}{" "}
+              </div>{" "}
+              <div className="matchDisplayResultsPositive ">
+                {" "}
+                {lastNameMatchDisplayTrue}
+              </div>
+              <div className="matchDisplayResultsNegative">
+                {" "}
+                {lastNameMatchDisplayFalse}
+              </div>
+              <div className="matchDisplayResultsNegative">
+                {" "}
+                {lastNameMatchDisplayEmpty}
+              </div>{" "}
+              <div className="matchDisplayResultsNegative ">
+                {" "}
+                {firstNameMatchDisplayEmpty}
+              </div>
+              <div className="matchDisplayResultsNegative">
+                {firstNameMatchDisplayFalse}
+              </div>
+              <div className="matchDisplayResultsPositive">
+                {firstNameMatchDisplayTrue}
+              </div>
             </div>
           </Form>
+          <br />
+          <div style={{ textAlign: "center", marginBottom: "50px" }}>
+            {completeMatch ? (
+              <button className="btn">
+                {" "}
+                <a className="btn" href="/Success">
+                  {" "}
+                  Continue{" "}
+                </a>{" "}
+              </button>
+            ) : (
+              ""
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
 }
-
-const styles = {
-  marginTop10: {
-    marginTop: "10px",
-  },
-  boiText: {
-    color: "#444444",
-    fontFamily: "Open-Sans,sans serif",
-    fontWeight: "600",
-  },
-  width300: {
-    width: "300px",
-  },
-  boiButton: {
-    backgroundColor: "#106988",
-    color: "white",
-  },
-};
 
 export default Upload;

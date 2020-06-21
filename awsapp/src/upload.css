@@ -14,17 +14,74 @@
   font-weight: bold;
 }
 
+.btn-loading {
+  border: 2px solid #808080;
+  color: white;
+  background-color: #106988;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
 .width {
   width: 100%;
 }
 
-.widthThree {
+.margintop10 {
+  margin-top: 10px;
+}
+
+.boiText {
+  color: #053c59;
+  font-family: Open-Sans, sans serif;
+  font-weight: 600;
+}
+
+/* .yourDetails {
+  color: #1683ab;
+  font-family: Open-Sans, sans serif;
+  font-weight: 400;
+  text-decoration: "italic";
+  line-height: 24px;
+} */
+
+.boiTextInput {
+  color: #053c59;
+  font-family: Open-Sans, sans serif;
+  font-weight: 400;
+}
+
+.boiTextLoadingPage {
+  color: #013c5c;
+  font-family: Open-Sans, sans serif;
+  font-weight: 300;
+}
+
+.boiParagraphLandingPage {
+  text-decoration: italic;
+  color: #777777;
+  font-weight: 400;
+  font-family: Open-Sans, sans serif;
+}
+
+.matchDisplayResultsPositive {
+  text-decoration: italic;
+  color: green;
+  font-weight: 400;
+  font-family: Open-Sans, sans serif;
+}
+
+.matchDisplayResultsNegative {
+  text-decoration: italic;
+  color: red;
+  font-weight: 400;
+  font-family: Open-Sans, sans serif;
+}
+
+.width300 {
   width: 300px;
 }
-/* html h5 * {
-  font-family: Open Sans;
-  color: #444444;
-} */
 
 body * {
   font-family: open sans;
