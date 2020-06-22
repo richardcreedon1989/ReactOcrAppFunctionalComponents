@@ -13,6 +13,10 @@ import {
 } from "reactstrap";
 import axios from "axios";
 import "./upload.css";
+import {
+    isPPSNValid,
+    isPPSNValidNew
+} from './ppsnValidator'
 
 //Assistance - resubmit the old image again. Can only select new image/
 //ToDo - Lambda retrun false if "" sent for names, Clean up hooks, Check extra digit validation, rename variables to be more clear (isFirstNamePresent) understand loop better/
@@ -55,37 +59,6 @@ function Upload(props) {
     // PPSN VALIDATION
     const onPPSNInputChange = (e) => {
         const value = e.target.value;
-
-        function isPPSNValid(ppsn) {
-            if (ppsn.length < 8 || ppsn.length > 9) {
-                return false;
-            }
-            const checkChar = ppsn.charAt(7).toUpperCase();
-            const checkNum = checkChar.charCodeAt(0) - 64;
-            let sum = 0;
-            for (let i = 2; i < 9; i++) {
-                sum += parseInt(ppsn.charAt(8 - i)) * i;
-            }
-            return sum % 23 === checkNum;
-        }
-
-        function isPPSNValidNew(ppsn) {
-            if (ppsn.length < 8 || ppsn.length > 9) {
-                return false;
-            }
-            const checkChar = ppsn.charAt(7).toUpperCase();
-            const checkNum = checkChar.charCodeAt(0) - 64;
-            let sum = 0;
-            for (let i = 2; i < 9; i++) {
-                sum += parseInt(ppsn.charAt(8 - i)) * i;
-            }
-            const newCheckChar = ppsn.charAt(8).toUpperCase();
-            const newCheckNum = newCheckChar.charCodeAt(0) - 64;
-            sum += newCheckNum * 9;
-
-            return sum % 23 === checkNum;
-        }
-
         setPpsnInvalid(!isPPSNValidNew(value) && !isPPSNValid(value))
         setFormValues({ ...formValues, ppsn: value });
     };
