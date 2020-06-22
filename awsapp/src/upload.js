@@ -30,7 +30,6 @@ function Upload(props) {
     const [firstNamePresent, setFirstNamePresent] = useState(false);
 
     const [checkBox, setCheckBox] = useState("");
-    // const [invoiceUploaded, setInvoiceUploaded] = useState("Upload Document");
     const [ocrSuccess, setOcrSuccess] = useState(false);
     const [originalPpsn, setOriginalPpsn] = useState("");
     const [originalLastName, setOriginalLastName] = useState("");
@@ -43,12 +42,13 @@ function Upload(props) {
         lastName: "",
     });
 
-    const { ppsn, firstName, lastName } = formValues;
-
     const handleChange = (e) => {
-        e.preventDefault();
         const { name, value } = e.target;
-        setFormValues({ ...formValues, [name]: value });
+
+        let newFormValues = { ...formValues };
+        newFormValues[name] = value;
+
+        setFormValues(newFormValues);
     };
 
     const checkBoxHandler = (e) => {
@@ -186,7 +186,11 @@ function Upload(props) {
 
     useEffect(() => {
         if (ocrSuccess) {
-            setFormValues({ ppsn: "", firstName: "", lastNamePresent: "" });
+            setFormValues({
+                ppsn: "",
+                firstName: "",
+                lastName: ""
+            });
         }
         ppsnMatchDisplayTrue &&
             lastNameMatchDisplayTrue &&
@@ -245,7 +249,7 @@ function Upload(props) {
                                 value={formValues.ppsn}
                             />
 
-                            {ppsn !== "" && ppsnInvalid &&
+                            {formValues.ppsn !== "" && ppsnInvalid &&
                                 <FormFeedback className="text-danger">
                                     Please enter valid PPSN
                                 </FormFeedback>
@@ -267,7 +271,7 @@ function Upload(props) {
                                 placeholder="(Bloggs)"
                                 onChange={handleChange}
                                 disabled={ppsnInvalid}
-                                value={lastName || ""}
+                                value={formValues.lastName}
                             />
 
                         </FormGroup>
@@ -287,7 +291,7 @@ function Upload(props) {
                                 placeholder="(Joe)"
                                 onChange={handleChange}
                                 disabled={ppsnInvalid}
-                                value={firstName || ""}
+                                value={formValues.firstName}
                             />
 
                         </FormGroup>
@@ -296,8 +300,7 @@ function Upload(props) {
                             className="boiText"
                             style={{ marginBottom: "5px", marginTop: "20px" }}
                         >
-                            {" "}
-              Document Type{" "}
+                            Document Type
                         </h4>
                         <FormGroup
                             style={{
@@ -350,8 +353,8 @@ function Upload(props) {
                                 value="Social Welfare Document"
                                 label={
                                     <span className="boiTextInput">
-                                        {" "}
-                    Social Welfare Document{" "}
+
+                                    Social Welfare Document
                                     </span>
                                 }
                                 onChange={checkBoxHandler}
@@ -374,10 +377,6 @@ function Upload(props) {
                             />
                         </FormGroup>
                         <FormGroup>
-                            {/* <h4 className="boiText"> {invoiceUploaded}</h4>
-              <h4 className="text-danger">{searchingDocumentMessage}</h4> */}
-                            <br />
-
                             {!completeMatch &&
                                 <div className="width upload-btn-wrapper ">
                                     <button className="btn width">Upload</button>
