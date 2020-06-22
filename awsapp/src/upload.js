@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import FileBase64 from "react-file-base64";
 import {
+  Container,
+  Row,
+  Col,
   Form,
   FormGroup,
   Label,
@@ -219,8 +222,8 @@ function Upload(props) {
       setFormValues({ ppsn: "", firstName: "", lastNamePresent: "" });
     }
     ppsnMatchDisplayTrue &&
-    lastNameMatchDisplayTrue &&
-    firstNameMatchDisplayTrue
+      lastNameMatchDisplayTrue &&
+      firstNameMatchDisplayTrue
       ? setCompleteMatch(true)
       : setCompleteMatch(false);
   }, [
@@ -231,9 +234,9 @@ function Upload(props) {
   ]);
 
   return (
-    <div className="container">
-      <div className="mt-3">
-        <div>
+    <Container>
+      <Row className="mt-3">
+        <Col>
           <img
             style={{
               padding: "10px 0 0px 0",
@@ -243,8 +246,17 @@ function Upload(props) {
             src={require("./loading.png")}
             alt="boi"
           />
+
+        </Col>
+
+      </Row>
+
+      <Row>
+        <Col></Col>
+        <Col sm={6}>
+
           <Form>
-            <FormGroup>
+            <FormGroup >
               <Label
                 style={{ marginTop: "2px", marginBottom: "2px" }}
                 for="ppsn"
@@ -255,27 +267,28 @@ function Upload(props) {
                   Personal Public Service Number{" "}
                   <span style={{ color: "red" }}> * </span>
                 </h5>
+              </Label>
 
-                <Input
-                  style={{ marginTop: "2px", marginBottom: "2px" }}
-                  className="width300"
-                  type="text"
-                  name="ppsn"
-                  id="ppsn"
-                  placeholder="(e.g. 1234567P)"
-                  onChange={handleChange}
-                  onBlur={_onBlur}
-                  value={ppsn || ""}
-                />
+              <Input
+                style={{ marginTop: "2px", marginBottom: "2px" }}
 
-                {ppsnInvalidMessage ? (
-                  <FormFeedback className="text-danger">
-                    Please enter valid PPSN
-                  </FormFeedback>
-                ) : (
+                type="text"
+                name="ppsn"
+                id="ppsn"
+                placeholder="(e.g. 1234567P)"
+                onChange={handleChange}
+                onBlur={_onBlur}
+                value={ppsn || ""}
+              />
+
+              {ppsnInvalidMessage ? (
+                <FormFeedback className="text-danger">
+                  Please enter valid PPSN
+                </FormFeedback>
+              ) : (
                   <FormFeedback></FormFeedback>
                 )}
-              </Label>
+
             </FormGroup>
             <FormGroup>
               <Label
@@ -283,18 +296,18 @@ function Upload(props) {
                 for="lastName"
               >
                 <h5 className="boiText"> Last Name</h5>
-                <Input
-                  style={{ marginTop: "2px", marginBottom: "2px" }}
-                  className="width300"
-                  type="text"
-                  name="lastName"
-                  id="lastName"
-                  placeholder="(Bloggs)"
-                  onChange={handleChange}
-                  disabled={disabled}
-                  value={lastName || ""}
-                />
               </Label>
+              <Input
+                style={{ marginTop: "2px", marginBottom: "2px" }}
+                type="text"
+                name="lastName"
+                id="lastName"
+                placeholder="(Bloggs)"
+                onChange={handleChange}
+                disabled={disabled}
+                value={lastName || ""}
+              />
+
             </FormGroup>
             <FormGroup>
               <Label
@@ -302,18 +315,19 @@ function Upload(props) {
                 for="firstName"
               >
                 <h5 className="boiText"> First Name </h5>
-                <Input
-                  style={{ marginTop: "2px", marginBottom: "0px" }}
-                  className="width300"
-                  type="text"
-                  name="firstName"
-                  id="firstName"
-                  placeholder="(Joe)"
-                  onChange={handleChange}
-                  disabled={disabled}
-                  value={firstName || ""}
-                />
+
               </Label>
+              <Input
+                style={{ marginTop: "2px", marginBottom: "0px" }}
+                type="text"
+                name="firstName"
+                id="firstName"
+                placeholder="(Joe)"
+                onChange={handleChange}
+                disabled={disabled}
+                value={firstName || ""}
+              />
+
             </FormGroup>
 
             <h4
@@ -444,7 +458,12 @@ function Upload(props) {
               </div>
             </div>
           </Form>
-          <br />
+        </Col>
+        <Col></Col>
+      </Row>
+
+      <Row>
+        <Col>
           <div style={{ textAlign: "center", marginBottom: "50px" }}>
             {completeMatch ? (
               <button className="btn">
@@ -455,12 +474,12 @@ function Upload(props) {
                 </a>{" "}
               </button>
             ) : (
-              ""
-            )}
+                ""
+              )}
           </div>
-        </div>
-      </div>
-    </div>
+        </Col>
+      </Row>
+    </Container>
   );
 }
 
